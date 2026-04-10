@@ -1,0 +1,553 @@
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>奶茶日记 🧋</title>
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #84CBAA;
+      --primary-light: #B9E2CE;
+      --primary-dark: #549B76;
+      --accent: #FFB29A;
+      --accent-light: #FFD8CC;
+      --bg-warm: #F6FBFA;
+      --bg-card: #FFFFFF;
+      --text-dark: #3A4B43;
+      --text-mid: #6E8076;
+      --text-light: #A4B3AB;
+      --success: #5CB488;
+      --gradient-main: linear-gradient(135deg, #99D9BA 0%, #70C79D 100%);
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans SC", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-warm);
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+
+    .hero-header {
+      background: var(--gradient-main);
+      position: relative;
+      overflow: hidden;
+      padding: 48px 24px 28px;
+    }
+
+    .hero-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 400px;
+      height: 400px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+    }
+
+    .hero-header::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -10%;
+      width: 300px;
+      height: 300px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 50%;
+    }
+
+    .header-inner {
+      max-width: 520px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .header-left .logo-row h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    .header-left .date-str {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .header-right {
+      text-align: right;
+      color: #fff;
+    }
+
+    .header-right .label {
+      font-size: 11px;
+      opacity: 0.75;
+      margin-bottom: 2px;
+    }
+
+    .header-right .big-num {
+      font-size: 44px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .record-btn.animate-pop {
+      animation: popEffect 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popEffect {
+      0% { transform: scale(1); }
+      30% { transform: scale(1.18); }
+      60% { transform: scale(0.93); }
+      80% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    .pulse-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      border: 3px solid rgba(132, 203, 170, 0.45);
+      animation: pulseRing 2s ease-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes pulseRing {
+      0% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+      100% { transform: translate(-50%, -50%) scale(1.9); opacity: 0; }
+    }
+
+    .content-wrap {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 16px 32px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin: 20px 0 12px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 18px;
+      background: var(--gradient-main);
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 20px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid rgba(132, 203, 170, 0.15);
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-80px);
+      background: var(--gradient-main);
+      color: white;
+      padding: 11px 22px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 10000;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(132, 203, 170, 0.3);
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(45, 32, 22, 0.5);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 24px;
+      padding: 28px 28px 24px;
+      width: 88%;
+      max-width: 340px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-overlay.show .modal-content {
+      transform: scale(1) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="toast" id="toast"></div>
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-content">
+      <div class="modal-head">
+        <div>
+          <div class="m-title" id="modalTitle">修改记录</div>
+          <div class="m-date" id="modalDate"></div>
+        </div>
+        <button class="modal-close" onclick="closeModal()"><i class="fa fa-times"></i></button>
+      </div>
+      <div class="count-hint">🧋 这天喝了几杯？</div>
+      <div class="count-control">
+        <button class="count-btn minus" onclick="adjustModalCount(-1)"><i class="fa fa-minus"></i></button>
+        <div class="count-display" id="modalCount">0</div>
+        <button class="count-btn plus" onclick="adjustModalCount(1)"><i class="fa fa-plus"></i></button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">取消</button>
+        <button class="btn-confirm" onclick="saveModalCount()"><i class="fa fa-check" style="margin-right:4px;"></i>保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: var(--gradient-main); position: relative; overflow: hidden; padding: 36px 24px 28px;">
+    <div style="position:absolute;top:-50%;right:-20%;width:400px;height:400px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+    <div style="position:absolute;bottom:-30%;left:-10%;width:300px;height:300px;background:rgba(255,255,255,0.06);border-radius:50%;"></div>
+    <div style="max-width:520px;margin:0 auto;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <span style="font-size:28px;"> 🧋</span>
+          <h1 style="font-size:26px;font-weight:900;color:#fff;letter-spacing:2px;">奶茶日记</h1>
+        </div>
+        <div id="headerDateStr" style="font-size:13px;color:rgba(255,255,255,0.82);letter-spacing:0.5px;">2026 年 四 月 10 日 周五</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-wrap">
+    <div class="stats-grid" style="margin-top:20px;">
+      <div class="stat-card week-card">
+        <div class="inner">
+          <div class="s-icon"><i class="fa fa-calendar-week"></i> 本周</div>
+          <div class="s-num" id="weekCount">0</div>
+          <div class="s-unit">杯奶茶</div>
+          <div class="s-range" id="weekRange">4/5 – 4/11</div>
+        </div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#FFCBB8,#FFA487);">
+        <div class="inner">
+          <div class="s-icon"><i class="fa fa-calendar-alt"></i> 本月</div>
+          <div class="s-num" id="todayStatCount">0</div>
+          <div class="s-unit">杯奶茶</div>
+          <div class="s-range" id="todayDateStr">4月份</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:12px;">
+      <div style="flex:1;background:linear-gradient(135deg,#F2FAF6,#E8F5EF);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#A1E2C2,#86D2AD);display:flex;align-items:center;justify-content:center;font-size:18px;">🧋</div>
+        <div>
+          <div style="font-size:11px;color:var(--text-light);">今日杯数</div>
+          <span id="statTodayCount" style="font-size:28px;font-weight:900;color:var(--primary-dark);">0</span>
+          <span style="font-size:11px;color:var(--text-light);">杯</span>
+        </div>
+      </div>
+      <div style="flex:1;background:linear-gradient(135deg,#FFF5F0,#FFECE5);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#FFD0BD,#FFAB8B);display:flex;align-items:center;justify-content:center;font-size:18px;">📅</div>
+        <div>
+          <div style="font-size:11px;color:var(--text-light);">三日内杯数</div>
+          <span id="stat3DayCount" style="font-size:28px;font-weight:900;color:var(--accent);">0</span>
+          <span style="font-size:11px;color:var(--text-light);">杯</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card calendar-card" style="margin-top:12px;">
+      <div class="cal-nav">
+        <button class="month-nav-btn" onclick="changeMonth(-1)"><i class="fa fa-chevron-left"></i></button>
+        <div class="cal-nav-title">
+          <div class="main" id="calMonthTitle">2026年4月</div>
+        </div>
+        <button class="month-nav-btn" id="nextMonthBtn" onclick="changeMonth(1)" disabled><i class="fa fa-chevron-right"></i></button>
+      </div>
+      <div class="calendar-grid">
+        <div class="cal-week-hd weekend">日</div>
+        <div class="cal-week-hd">一</div>
+        <div class="cal-week-hd">二</div>
+        <div class="cal-week-hd">三</div>
+        <div class="cal-week-hd">四</div>
+        <div class="cal-week-hd">五</div>
+        <div class="cal-week-hd weekend">六</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:14px;">
+      <button id="shouldDrinkBtn" onclick="showShouldDrink()" style="flex:1;border:none;border-radius:16px;background:linear-gradient(135deg,#FFCBB8,#FFA487);color:white;font-size:15px;font-weight:700;min-height:56px;">要不要喝？</button>
+      <button onclick="recordDrink()" id="mainRecordBtn" style="flex:1;border:none;border-radius:16px;background:var(--gradient-main);color:white;font-size:15px;font-weight:700;min-height:56px;position:relative;">
+        <span style="font-size:20px;">🧋</span>
+        <span>喝了一杯</span>
+        <div class="pulse-ring"></div>
+      </button>
+    </div>
+
+    <div class="modal-overlay" id="shouldDrinkModal">
+      <div class="modal-content" style="max-width:360px;">
+        <div class="modal-head">
+          <div>
+            <div class="m-title">🔮 喝茶建议</div>
+            <div class="m-date" id="sdSubtitle">基于你的历史数据</div>
+          </div>
+          <button class="modal-close" onclick="closeShouldDrink()"><i class="fa fa-times"></i></button>
+        </div>
+        <div id="sdVerdict" style="border-radius:16px;padding:18px 16px;text-align:center;margin-bottom:16px;">
+          <div id="sdEmoji" style="font-size:48px;margin-bottom:8px;"></div>
+          <div id="sdConclusion" style="font-size:18px;font-weight:800;margin-bottom:6px;"></div>
+          <div id="sdReason" style="font-size:13px;line-height:1.7;"></div>
+        </div>
+        <div id="sdStats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px;"></div>
+        <button onclick="closeShouldDrink()" style="width:100%;padding:13px;border-radius:14px;border:none;background:var(--gradient-main);color:white;font-size:14px;font-weight:700;">知道了 👌</button>
+      </div>
+    </div>
+
+    <div class="tip-box" style="margin-top:12px;">
+      <div class="tip-icon"><i class="fa fa-lightbulb"></i></div>
+      <div>
+        <div class="tip-title">小贴士</div>
+        <div class="tip-body">营养师建议每周奶茶不超过 2–3 杯，注意控制糖分与热量摄入，保持健康生活 🍀</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'milktea_records_v2';
+    let calendarYear, calendarMonth;
+    let editingDateKey = '', editingCount = 0;
+
+    function getData() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveData(d) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+    }
+
+    function getDateKey(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return ${y}-${m}-${d};
+    }
+
+    function getToday() {
+      return new Date();
+    }
+
+    function getTodayKey() {
+      return getDateKey(getToday());
+    }
+
+    function init() {
+      const now = getToday();
+      calendarYear = now.getFullYear();
+      calendarMonth = now.getMonth();
+      updateHeaderDate();
+      updateTodayDisplay();
+      updateStats();
+      renderCalendar();
+    }
+
+    function updateHeaderDate() {
+      const now = getToday();
+      const wds = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+      const months = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
+      document.getElementById('headerDateStr').textContent =
+        ${now.getFullYear()} 年 ${months[now.getMonth()]} 月 ${now.getDate()} 日 ${wds[now.getDay()]};
+    }
+
+    function recordDrink() {
+      const data = getData();
+      const key = getTodayKey();
+      data[key] = (data[key] || 0) + 1;
+      saveData(data);
+      const btn = document.getElementById('mainRecordBtn');
+      btn.classList.remove('animate-pop');
+      void btn.offsetWidth;
+      btn.classList.add('animate-pop');
+      updateTodayDisplay();
+      updateStats();
+      renderCalendar();
+      showToast(🧋 今日已喝 ${data[key]} 杯！);
+    }
+
+    function updateTodayDisplay() {
+      const data = getData();
+      const now = getToday();
+      const todayKey = getTodayKey();
+      const count = data[todayKey] || 0;
+      document.getElementById('statTodayCount').textContent = count;
+      let threeDayTotal = 0;
+      for (let i = 0; i < 3; i++) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
+        threeDayTotal += data[getDateKey(d)] || 0;
+      }
+      document.getElementById('stat3DayCount').textContent = threeDayTotal;
+    }
+
+    function updateStats() {
+      const data = getData();
+      const now = getToday();
+      const y = now.getFullYear();
+      const mo = now.getMonth();
+      let monthTotal = 0;
+      for (const key in data) {
+        const parts = key.split('-');
+        const ky = parseInt(parts[0]);
+        const km = parseInt(parts[1]) - 1;
+        if (ky === y && km === mo) monthTotal += data[key];
+      }
+      const dow = now.getDay();
+      const wStart = new Date(now);
+      wStart.setDate(now.getDate() - dow);
+      let weekTotal = 0;
+      for (let i = 0; i <= dow; i++) {
+        const d = new Date(wStart);
+        d.setDate(wStart.getDate() + i);
+        weekTotal += data[getDateKey(d)] || 0;
+      }
+      document.getElementById('weekCount').textContent = weekTotal;
+      document.getElementById('todayStatCount').textContent = monthTotal;
+    }
+
+    function renderCalendar() {
+      const data = getData();
+      const now = getToday();
+      const todayKey = getDateKey(now);
+      document.getElementById('calMonthTitle').textContent = ${calendarYear}年${calendarMonth+1}月;
+      const isCur = calendarYear === now.getFullYear() && calendarMonth === now.getMonth();
+      document.getElementById('nextMonthBtn').disabled = isCur;
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
+      const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+      const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateObj = new Date(calendarYear, calendarMonth, d);
+        const key = getDateKey(dateObj);
+        const count = data[key] || 0;
+        const isToday = key === todayKey;
+        const cell = document.createElement('div');
+        let cls = 'calendar-day';
+        if (isToday) cls += ' today';
+        if (count >= 3) cls += ' has-record-3';
+        else if (count === 2) cls += ' has-record-2';
+        else if (count === 1) cls += ' has-record-1';
+        cell.className = cls;
+        cell.innerHTML = <span class="day-num">${d}</span>${count > 0 ? <span class="day-count">${count}杯</span> : ''};
+        cell.addEventListener('click', () => openEditModal(key, d, data[key] || 0));
+        grid.appendChild(cell);
+      }
+    }
+
+    function changeMonth(delta) {
+      calendarMonth += delta;
+      if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+      if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+      renderCalendar();
+    }
+
+    function openEditModal(key, day, count) {
+      editingDateKey = key;
+      editingCount = count;
+      const p = key.split('-');
+      document.getElementById('modalDate').textContent = ${p[0]}年${parseInt(p[1])}月${parseInt(p[2])}日;
+      document.getElementById('modalCount').textContent = editingCount;
+      document.getElementById('editModal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('editModal').classList.remove('show');
+    }
+
+    function adjustModalCount(d) {
+      editingCount = Math.max(0, editingCount + d);
+      document.getElementById('modalCount').textContent = editingCount;
+    }
+
+    function saveModalCount() {
+      const data = getData();
+      if (editingCount === 0) delete data[editingDateKey];
+      else data[editingDateKey] = editingCount;
+      saveData(data);
+      closeModal();
+      updateTodayDisplay();
+      updateStats();
+      renderCalendar();
+      showToast(✅ 记录已保存);
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    function showShouldDrink() {
+      document.getElementById('shouldDrinkModal').classList.add('show');
+    }
+
+    function closeShouldDrink() {
+      document.getElementById('shouldDrinkModal').classList.remove('show');
+    }
+
+    init();
+  </script>
+</body>
+</html>
